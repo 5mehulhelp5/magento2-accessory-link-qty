@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Model\Product\CopyConstructor\Composite">
+        <arguments>
+            <argument name="constructors" xsi:type="array">
+                <item name="partlists" xsi:type="string">InSession\AccessoryLinkQty\Model\Product\CopyConstructor\Partlists</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Catalog\Model\Product\LinkTypeProvider">
+        <arguments>
+            <argument name="linkTypes" xsi:type="array">
+                <item name="partlists" xsi:type="const">InSession\AccessoryLinkQty\Model\Product\Link::LINK_TYPE_PARTLISTS</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Catalog\Model\ProductLink\CollectionProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="partlists" xsi:type="object">InSession\AccessoryLinkQty\Model\ProductLink\CollectionProvider\Partlists</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\CatalogImportExport\Model\Import\Product">
+        <plugin name="in_session_import_partlists"
+                type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Import\Product"
+                sortOrder="20"/>
+    </type>
+    <type name="Magento\Catalog\Model\Product\Initialization\Helper\ProductLinks">
+        <plugin name="insession_partlists_links_initializer"
+                type="InSession\AccessoryLinkQty\Model\Product\Initialization\Helper\ProductLinks\Plugin\Partlists"
+                sortOrder="20"/>
+    </type>
+    <type name="Magento\CatalogImportExport\Model\Import\Product">
+        <plugin name="insession_add_partlists_link_type_to_import"
+                type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Import\Product"/>
+    </type>
+</config>

@@ -1,0 +1,15 @@
+# etc/schema.graphqls
+extend interface ProductInterface {
+  partlists: Partlist @resolver(class: "InSession\\AccessoryLinkQty\\Model\\Resolver\\Partlist")
+    @doc(description: "Get partlist products for the given product.")
+}
+
+type Partlist @doc(description: "Contains the linked partlist items for a product.") {
+  items: [PartlistItem!]! @doc(description: "Linked partlist items.")
+}
+
+type PartlistItem @doc(description: "A single linked partlist item with its quantity.") {
+  product: ProductInterface! @doc(description: "The linked product.")
+  qty: Float! @doc(description: "Required quantity for this item.")
+  position: Int! @doc(description: "Required position for this item.")
+}

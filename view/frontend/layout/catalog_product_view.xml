@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="product.info.main">
+            <!--attributes_to_select is required for show_disabled_products-->
+            <!--<block class="InSession\AccessoryLinkQty\Block\Product\View\Partlists"
+                   name="product.info.partlists"
+                   template="InSession_AccessoryLinkQty::partlists.phtml"
+                   after="product.info.price">
+                <arguments>
+                    <argument name="title" xsi:type="string" translate="true">Partlist</argument>
+                    <argument name="show_all_products" xsi:type="boolean">true</argument>
+                    <argument name="show_invisible_products" xsi:type="boolean">true</argument>
+                    <argument name="show_disabled_products" xsi:type="boolean">true</argument>
+                    <argument name="attributes_to_select" xsi:type="array">
+                        <item name="name" xsi:type="string">name</item>
+                        <item name="sku" xsi:type="string">sku</item>
+                        <item name="small_image" xsi:type="string">small_image</item>
+                        <item name="price" xsi:type="string">price</item>
+                        <item name="status" xsi:type="string">status</item>
+                    </argument>
+                </arguments>
+            </block>-->
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,188 @@
+<?php
+/**
+ * @var \InSession\AccessoryLinkQty\Block\Product\View\Partlists $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$items      = $block->getItemsWithQty();
+$product    = $block->getProduct();
+$productSku = $product ? (string)$product->getSku() : '';
+$title      = (string)$block->getTitle();
+?>
+
+<?php if (!empty($items)): ?>
+    <div class="products wrapper grid products-grid partlists-related">
+        <h3 class="partlists-title"><?= $escaper->escapeHtml($title) ?></h3>
+
+        <ol class="products list items product-items">
+            <?php foreach ($items as $row): ?>
+                <?php
+                /** @var \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $p */
+                $p          = $row['product'];
+                $qty        = (float)$row['qty'];
+                $hasUrl     = $p->getProductUrl();
+                $url        = $hasUrl ? $escaper->escapeUrl($p->getProductUrl()) : '#';
+                $img        = $block->getImage($p, 'related_products_list')->toHtml();
+                $isSaleable = $p->isSaleable();
+                ?>
+                <li class="item product product-item" data-sku="<?= $escaper->escapeHtmlAttr($p->getSku()) ?>">
+                    <div class="product-item-info">
+                        <?php if ($hasUrl): ?>
+                            <a class="product photo product-item-photo" href="<?= $url ?>" aria-label="<?= $escaper->escapeHtmlAttr($p->getName()) ?>">
+                                <?= $img /* already escaped */ ?>
+                                <span class="partlist-qty-badge" style="position:absolute;top:.5rem;left:.5rem;background:#111;color:#fff;font-size:.75rem;padding:.25rem .5rem;border-radius:9999px;">
+                                    <?= $escaper->escapeHtml(rtrim(rtrim(number_format($qty, 2, ',', '.'), '0'), ',')) ?> ×
+                                </span>
+                            </a>
+                        <?php else: ?>
+                            <span class="product photo product-item-photo">
+                                <?= $img /* already escaped */ ?>
+                                <span class="partlist-qty-badge" style="position:absolute;top:.5rem;left:.5rem;background:#111;color:#fff;font-size:.75rem;padding:.25rem .5rem;border-radius:9999px;">
+                                    <?= $escaper->escapeHtml(rtrim(rtrim(number_format($qty, 2, ',', '.'), '0'), ',')) ?> ×
+                                </span>
+                            </span>
+                        <?php endif; ?>
+
+                        <div class="product details product-item-details">
+                            <strong class="product name product-item-name">
+                                <?php if ($hasUrl): ?>
+                                    <a href="<?= $url ?>"><?= $escaper->escapeHtml($p->getName()) ?></a>
+                                <?php else: ?>
+                                    <span><?= $escaper->escapeHtml($p->getName()) ?></span>
+                                <?php endif; ?>
+                            </strong>
+
+                            <?= $block->getProductPrice($p) ?>
+                            
+                            <div class="actions-primary" style="margin-top:.5rem;">
+                                <?php if ($isSaleable): ?>
+                                    <form data-role="tocart-form" action="<?= $escaper->escapeUrl($block->getAddToCartUrl($p)) ?>" method="post">
+                                        <?= $block->getBlockHtml('formkey') ?>
+                                        <input type="hidden" name="product" value="<?= (int)$p->getId() ?>"/>
+                                        <button type="submit" class="action tocart primary">
+                                            <span><?= $escaper->escapeHtml(__('In den Warenkorb')) ?></span>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <div class="stock unavailable">
+                                        <span><?= $escaper->escapeHtml(__('Nicht verfügbar')) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+<?php endif; ?>
+
+<?php if ($productSku): ?>
+    <!-- Optional: GraphQL-Showcase/Fallback -->
+    <div id="partlists-container-graphql"
+         class="products wrapper grid products-grid partlists-related"
+         data-sku="<?= $escaper->escapeHtmlAttr($productSku) ?>"
+         style="padding:1rem;border:1px dashed #007bff;margin-top:1rem;">
+        <h3 class="partlists-title">
+            <?= $escaper->escapeHtml($title) ?>
+            <small>(<?= $escaper->escapeHtml(__('geladen mit GraphQL')) ?>)</small>
+        </h3>
+        <p class="message info loading"><?= $escaper->escapeHtml(__('Lade Daten...')) ?></p>
+        <ol class="products list items product-items" style="display:none;"></ol>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('partlists-container-graphql');
+        if (!container) return;
+
+        const list = container.querySelector('ol.product-items');
+        const loadingMessage = container.querySelector('p.loading');
+        const sku = container.getAttribute('data-sku');
+        if (!sku) return;
+
+        const query = `
+          query GetPartlists($sku: String!) {
+              products(filter: { sku: { eq: $sku } }) {
+                items {
+                  partlists {
+                    items {
+                      qty
+                      product {
+                        name
+                        sku
+                        canonical_url
+                        small_image { url label }
+                        price_range { minimum_price { final_price { value currency } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }`;
+
+        fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables: { sku } })
+        })
+        .then(r => r.json())
+        .then(json => {
+            try {
+                if (loadingMessage) loadingMessage.style.display = 'none';
+
+                const items = json?.data?.products?.items?.[0]?.partlists?.items || [];
+                if (!items.length) {
+                    container.insertAdjacentHTML('beforeend', '<p class="message info"><?= $escaper->escapeJs(__('Keine Teile gefunden.')) ?></p>');
+                    return;
+                }
+
+                let html = '';
+                for (const it of items) {
+                    const p = it.product;
+                    if (!p) continue;
+
+                    const href = p.canonical_url
+                          || (p.url_rewrites?.[0]?.url ?? '')
+                          || '#';
+                    const price = (p.price_range && p.price_range.minimum_price && p.price_range.minimum_price.final_price)
+                        ? new Intl.NumberFormat('de-DE', { style:'currency', currency:p.price_range.minimum_price.final_price.currency })
+                            .format(p.price_range.minimum_price.final_price.value)
+                        : '';
+
+                    html += `
+                      <li class="item product product-item">
+                        <div class="product-item-info">
+                          <a class="product photo product-item-photo" href="${href}">
+                            <img loading="lazy" src="${p.small_image?.url ?? ''}" alt="${p.small_image?.label ?? ''}" />
+                            <span class="partlist-qty-badge" style="position:absolute;top:.5rem;left:.5rem;background:#111;color:#fff;font-size:.75rem;padding:.25rem .5rem;border-radius:9999px;">
+                              ${it.qty} ×
+                            </span>
+                          </a>
+                          <div class="product details product-item-details">
+                            <strong class="product name product-item-name"><a href="${href}">${p.name}</a></strong>
+                            ${price ? `<div class="price-box">${price}</div>` : ``}
+                          </div>
+                        </div>
+                      </li>`;
+                }
+
+                if (html) {
+                    list.innerHTML = html;
+                    list.style.display = '';
+                } else {
+                    container.insertAdjacentHTML('beforeend', '<p class="message info"><?= $escaper->escapeJs(__('Keine Teile gefunden.')) ?></p>');
+                }
+            } catch (e) {
+                console.error(e);
+                container.insertAdjacentHTML('beforeend', '<p class="message error"><?= $escaper->escapeJs(__('Fehler beim Laden.')) ?></p>');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            container.insertAdjacentHTML('beforeend', '<p class="message error"><?= $escaper->escapeJs(__('Fehler beim Laden.')) ?></p>');
+        });
+    });
+    </script>
+<?php endif; ?>
