@@ -3,6 +3,8 @@
 Magento 2 module: Adds a custom **product link type** `partlists`, including **quantity (qty)** and **position**.  
 This allows you to link spare parts or accessories to a main product with the required quantity.
 
+<img width="1797" height="502" alt="image" src="https://github.com/user-attachments/assets/239288ad-fa58-475a-8f34-693eac5802a0" />
+
 ---
 
 ## Why would you need this module?
