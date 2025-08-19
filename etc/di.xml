@@ -35,5 +35,4 @@
         <plugin name="insession_add_partlists_link_type_to_import"
                 type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Import\ProductImportPlugin"/>
     </type>
-
 </config>
