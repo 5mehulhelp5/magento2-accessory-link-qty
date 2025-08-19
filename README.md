@@ -5,12 +5,27 @@ This allows you to link spare parts or accessories to a main product with the re
 
 ---
 
+## Why would you need this module?
+
+By default, Magento only supports related, upsell, cross-sell and grouped product links.  
+This module adds a new link type **`partlists`** that can be used to model a *production bill of materials* (BOM).
+
+**Example use cases:**
+- You want to sell a **set** as a simple product with its own SKU and stock management,  
+  but still link and display the required **components** (e.g. jug, glass, spoon).  
+- You need a way to reflect an **ERP production bill of materials** inside Magento,  
+  so that each component can be managed individually while the parent product is still sold as a simple SKU.  
+- You want to show end customers which parts are included in a set, including required **quantities**.
+
+---
+
 ## Features
 - New product link type: `partlists`
 - Quantity (`qty`) and position for each link
 - Admin UI integration (tab in the product form Related Products, Up-Sells, Cross-Sells and Partlists )
 - Import/Export support via CSV (`_partlists_` column)
 - GraphQL support
+- REST API support out of the box
 - Frontend block to render linked partlist products
 
 ---
@@ -81,6 +96,62 @@ query {
           }
         }
       }
+    }
+  }
+}
+```
+
+---
+
+## REST API
+
+This module is fully compatible with Magento's REST API.  
+You can read and write `partlists` links using the standard `/V1/products/:sku/links` endpoints.
+
+### Read partlists
+```http
+GET /rest/V1/products/BASE-123/links
+```
+
+Example response excerpt:
+```json
+[
+  {
+    "sku": "BASE-123",
+    "link_type": "partlists",
+    "linked_product_sku": "MILK-JUG",
+    "position": 10,
+    "extension_attributes": {
+      "qty": 2
+    }
+  },
+  {
+    "sku": "BASE-123",
+    "link_type": "partlists",
+    "linked_product_sku": "LATTE-GLASS",
+    "position": 20,
+    "extension_attributes": {
+      "qty": 0.2
+    }
+  }
+]
+```
+
+### Create or update partlists
+```http
+POST /rest/V1/products/BASE-123/links
+```
+
+Payload example:
+```json
+{
+  "entity": {
+    "sku": "BASE-123",
+    "link_type": "partlists",
+    "linked_product_sku": "MILK-JUG",
+    "position": 10,
+    "extension_attributes": {
+      "qty": 2
     }
   }
 }
