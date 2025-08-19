@@ -32,7 +32,11 @@
                 sortOrder="20"/>
     </type>
     <type name="Magento\CatalogImportExport\Model\Import\Product">
-        <plugin name="insession_add_partlists_link_type_to_import"
+        <plugin name="in_session_import_partlists"
                 type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Import\ProductImportPlugin"/>
+    </type>
+    <type name="Magento\CatalogImportExport\Model\Export\Product">
+        <plugin name="in_session_export_partlists"
+                type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Export\ProductExportPlugin"/>
     </type>
 </config>
