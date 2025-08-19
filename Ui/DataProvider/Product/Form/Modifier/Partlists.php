@@ -72,33 +72,19 @@ class Partlists extends Related
     }
 
     /** @inheritdoc */
+    /** @inheritdoc */
     public function modifyMeta(array $meta): array
     {
-        $meta = array_replace_recursive(
-            $meta,
-            [
-                static::GROUP_RELATED => [
-                    'children'  => [
-                        $this->scopePrefix . static::DATA_SCOPE_PARTLISTS => $this->getPartlistsFieldset(),
-                    ],
-                    'arguments' => [
-                        'data' => [
-                            'config' => [
-                                'label'          => __('Related Products, Up-Sells, Cross-Sells and Partlists'),
-                                'collapsible'    => true,
-                                'componentType'  => Form\Fieldset::NAME,
-                                'dataScope'      => static::DATA_SCOPE,
-                                'sortOrder'      => $this->getNextGroupSortOrder(
-                                    $meta,
-                                    self::$previousGroup,
-                                    self::$sortOrder
-                                ),
-                            ],
-                        ],
-                    ],
-                ],
-            ]
-        );
+        $meta[static::GROUP_RELATED]['children'][$this->scopePrefix . static::DATA_SCOPE_PARTLISTS] = $this->getPartlistsFieldset();
+
+        $existingLabel = $meta[static::GROUP_RELATED]['arguments']['data']['config']['label'] ?? '';
+        $labelText = (string)$existingLabel;
+
+        if (!str_contains($labelText, 'Partlists')) {
+            $labelText .= ', Partlists';
+        }
+
+        $meta[static::GROUP_RELATED]['arguments']['data']['config']['label'] = __($labelText);
 
         return $meta;
     }
@@ -241,3 +227,4 @@ class Partlists extends Related
         ];
     }
 }
+
