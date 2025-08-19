@@ -26,10 +26,22 @@ This module adds a new link type **`partlists`** that can be used to model a *pr
 - Import/Export support via CSV (`_partlists_` column)
 - GraphQL support
 - REST API support out of the box
-- Frontend block to render linked partlist products
-
+- 
 ---
 
+## Frontend Example (optional)
+
+The module ships with a **sample `.phtml` template** for rendering linked `partlists` products.  
+This is provided as a **demonstration only** and is **not intended for production use**.
+
+- The sample block is defined in `view/frontend/layout/catalog_product_view.xml`.  
+- By default, it is **commented out**.  
+- If you want to use it, copy the block and template into your **custom theme** and adjust as needed.
+
+**Recommendation:**  
+Implement your own block or UI component in your theme that consumes the `partlists` data (via GraphQL, REST API, or the Partlists domain model) and renders it in your desired design.
+
+---
 ## Installation
 
 ### Composer Installation
