@@ -1,4 +1,4 @@
-# Magento 2.4+ Accessory Link Qty
+# Magento 2.4+ Accessory Link with Qty relation
 
 Magento 2 module: Adds a custom **product link type** `partlists`, including **quantity (qty)** and **position**.  
 This allows you to link spare parts or accessories to a main product with the required quantity.
@@ -26,7 +26,6 @@ This module adds a new link type **`partlists`** that can be used to model a *pr
 - Import/Export support via CSV (`_partlists_` column)
 - GraphQL support
 - REST API support out of the box
-- 
 ---
 
 ## Frontend Example (optional)
