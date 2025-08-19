@@ -1,4 +1,4 @@
-# InSession Accessory Link Qty
+# Magento 2.4+ Accessory Link Qty
 
 Magento 2 module: Adds a custom **product link type** `partlists`, including **quantity (qty)** and **position**.  
 This allows you to link spare parts or accessories to a main product with the required quantity.
