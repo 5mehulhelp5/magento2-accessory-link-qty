@@ -25,6 +25,13 @@
         <plugin name="in_session_import_partlists"
                 type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Import\Product"
                 sortOrder="20"/>
+    </type>    
+    <type name="Magento\Catalog\Model\ProductLink\MapProviderInterface">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="partlists" xsi:type="object">InSession\AccessoryLinkQty\Model\ProductLink\MapProvider\Partlists</item>
+            </argument>
+        </arguments>
     </type>
     <type name="Magento\Catalog\Model\Product\Initialization\Helper\ProductLinks">
         <plugin name="insession_partlists_links_initializer"
@@ -40,3 +47,4 @@
                 type="InSession\AccessoryLinkQty\Plugin\CatalogImportExport\Model\Export\ProductExportPlugin"/>
     </type>
 </config>
+
