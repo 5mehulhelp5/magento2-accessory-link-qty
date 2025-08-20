@@ -4,7 +4,7 @@
     <body>
         <referenceContainer name="product.info.main">
             <!--attributes_to_select is required for show_disabled_products-->
-            <!--<block class="InSession\AccessoryLinkQty\Block\Product\ProductList\Partlists"
+            <!--<block class="InSession\AccessoryLinkQty\Block\Product\View\Partlists"
                    name="product.info.partlists"
                    template="InSession_AccessoryLinkQty::partlists.phtml"
                    after="product.info.price">
@@ -26,3 +26,4 @@
     </body>
 
 </page>
+
