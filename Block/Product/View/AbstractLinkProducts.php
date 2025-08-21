@@ -68,13 +68,14 @@ abstract class AbstractLinkProducts extends AbstractProduct implements IdentityI
      */
     protected function _prepareData(): static
     {
+        // Return early if the collection has already been prepared
         if ($this->_itemCollection !== null) {
             return $this;
         }
 
         $current = $this->getProduct();
-        /* @var $current Product */
         if (!$current || !$current->getId()) {
+            // Return an empty collection if there is no current product
             $this->_itemCollection = $this->productCollectionFactory->create();
             return $this;
         }
@@ -82,57 +83,64 @@ abstract class AbstractLinkProducts extends AbstractProduct implements IdentityI
         try {
             $link = $this->configureLinkModel($this->linkModel);
             $linkCollection = $link->getLinkCollection()->setProduct($current);
+
+            // Gather all linked product IDs in an array
             $linkedProductIds = array_values(array_filter(
                 array_map('intval', $linkCollection->getColumnValues('linked_product_id')),
                 static fn($id) => $id > 0
             ));
+
             if (!$linkedProductIds) {
+                // If there are no linked products, return an empty collection
                 $this->_itemCollection = $this->productCollectionFactory->create();
                 return $this;
             }
 
             $showDisabled = (bool)$this->getData('show_disabled_products');
 
-            /** @var ProductCollection $collection */
+            /** @var \Magento\Catalog\Model\ResourceModel\Product\Collection $collection */
             $collection = $this->productCollectionFactory->create();
+
+            // Load all linked products in a single query (avoiding N+1 problem)
             $collection->addFieldToFilter('entity_id', ['in' => $linkedProductIds]);
 
-            if ($showDisabled) {                
-                // Load base attributes required for display and on-the-fly price calculation.
-                $collection->addAttributeToSelect(['name', 'sku', 'small_image', 'price', 'special_price', 'tax_class_id', 'status', 'visibility']);
+            // Only select the attributes required for display and price calculation
+            $defaultAttributes = ['name', 'sku', 'small_image', 'price', 'special_price', 'tax_class_id', 'status', 'visibility'];
+            if ($showDisabled) {
+                $collection->addAttributeToSelect($defaultAttributes);
             } else {
+                // Add all attributes and price information needed for frontend rendering
                 $this->_addProductAttributesAndPrices($collection);
-                $collection->addAttributeToFilter('status', ProductStatus::STATUS_ENABLED);
+                $collection->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
 
                 if (!$this->getData('show_all_products')) {
                     $collection->addIsSaleableFilter();
                 }
-
                 if (!$this->getData('show_invisible_products')) {
                     $collection->setVisibility($this->catalogProductVisibility->getVisibleInCatalogIds());
                 }
             }
 
-            // Neutralize category context for correct price rendering.
+            // Prevent category context from affecting price rendering
             foreach ($collection as $item) {
-                /* @var $item Product */
                 $item->setDoNotUseCategoryId(true);
             }
-            
-            // Apply sorting to the collection from either path.
+
+            // Preserve the order of linked products as defined in the partlist
             $collection->getSelect()->order(
-                new Zend_Db_Expr('FIELD(e.entity_id, ' . implode(',', $linkedProductIds) . ')')
+                new \Zend_Db_Expr('FIELD(e.entity_id, ' . implode(',', $linkedProductIds) . ')')
             );
 
+            // Set the loaded and sorted collection for use elsewhere
             $this->_itemCollection = $collection;
         } catch (\Throwable $e) {
+            // Log the error and return an empty collection as fallback
             $this->_logger->critical($e);
             $this->_itemCollection = $this->productCollectionFactory->create();
         }
 
         return $this;
     }
-
 
     /**
      * Get the loaded product item collection.
