@@ -98,8 +98,6 @@ abstract class AbstractLinkProducts extends AbstractProduct implements IdentityI
             $collection->addFieldToFilter('entity_id', ['in' => $linkedProductIds]);
 
             if ($showDisabled) {                
-                $collection->setFlag('has_stock_status_filter', true);
-
                 // Load base attributes required for display and on-the-fly price calculation.
                 $collection->addAttributeToSelect(['name', 'sku', 'small_image', 'price', 'special_price', 'tax_class_id', 'status', 'visibility']);
             } else {
@@ -115,16 +113,16 @@ abstract class AbstractLinkProducts extends AbstractProduct implements IdentityI
                 }
             }
 
-            // Apply sorting to the collection from either path.
-            $collection->getSelect()->order(
-                new Zend_Db_Expr('FIELD(e.entity_id, ' . implode(',', $linkedProductIds) . ')')
-            );
-
             // Neutralize category context for correct price rendering.
             foreach ($collection as $item) {
                 /* @var $item Product */
                 $item->setDoNotUseCategoryId(true);
             }
+            
+            // Apply sorting to the collection from either path.
+            $collection->getSelect()->order(
+                new Zend_Db_Expr('FIELD(e.entity_id, ' . implode(',', $linkedProductIds) . ')')
+            );
 
             $this->_itemCollection = $collection;
         } catch (\Throwable $e) {
